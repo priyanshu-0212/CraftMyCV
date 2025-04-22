@@ -1,4 +1,4 @@
-import PyPDF2
+import pdfplumber
 import docx
 import re
 from io import BytesIO
@@ -18,15 +18,16 @@ class ResumeParser:
                 # If it's already bytes
                 file_content = pdf_file
                 
-            pdf_reader = PyPDF2.PdfReader(BytesIO(file_content))
+            # Use pdfplumber instead of PyPDF2
             text = ""
-            for page in pdf_reader.pages:
-                page_text = page.extract_text()
-                if page_text:
-                    text += page_text + "\n"
-                else:
-                    # Handle empty page text
-                    text += "\n"
+            with pdfplumber.open(BytesIO(file_content)) as pdf:
+                for page in pdf.pages:
+                    page_text = page.extract_text()
+                    if page_text:
+                        text += page_text + "\n"
+                    else:
+                        # Handle empty page text
+                        text += "\n"
             return text.strip()
         except Exception as e:
             print(f"Error extracting text from PDF: {e}")
